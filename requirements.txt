@@ -1,2 +1,10 @@
 streamlit
 openai
+pypdf
+bs4
+anthropic
+pysqlite3-binary
+chromadb
+protobuf==3.20
+pathlib
+pandas

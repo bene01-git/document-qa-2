@@ -51,11 +51,11 @@ def load_csv_to_collection(csv_path, collection):
         add_to_collection(collection, text_chunk, doc_id, metadata)
 
 if 'HW7_VectorDB' not in st.session_state:
-    # Check if collection is empty and load the news.csv file
+    # Check if collection is empty and load the ELG_Database.csv file
     if collection.count() == 0:
         csv_path = 'ELG_Database.csv'
         if os.path.exists(csv_path):
-            with st.spinner("Loading and embedding news articles. This may take a moment..."):
+            with st.spinner("Loading and embedding rate cases and proceedings. This may take a moment..."):
                 load_csv_to_collection(csv_path, collection)
         else:
             st.error(f"Could not find '{csv_path}'. Please ensure it is in the same directory.")

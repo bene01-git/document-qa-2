@@ -43,14 +43,39 @@ def add_to_collection(collection, text, doc_id, metadata):
 
 def load_csv_to_collection(csv_path, collection):
     df = pd.read_csv(csv_path)
-    # Combine all columns in a row into a single searchable text string
+    
+    texts = []
+    doc_ids = []
+    metadatas = []
+    
     for index, row in df.iterrows():
         text_chunk = " | ".join([f"{col}: {str(val)}" for col, val in row.items()])
-        doc_id = f"news_doc_{index}"
-        metadata = {"source": "news.csv", "row": index}
-        add_to_collection(collection, text_chunk, doc_id, metadata)
+        texts.append(text_chunk)
+        doc_ids.append(f"news_doc_{index}")
+        metadatas.append({"source": "news.csv", "row": index})
+    
+    # Batch embed — one API call per 2000 rows instead of one per row
+    client = st.session_state.openai_client
+    BATCH = 2000
+    for i in range(0, len(texts), BATCH):
+        batch_texts = texts[i:i+BATCH]
+        batch_ids = doc_ids[i:i+BATCH]
+        batch_meta = metadatas[i:i+BATCH]
+        
+        response = client.embeddings.create(
+            input=batch_texts,
+            model='text-embedding-3-small'
+        )
+        embeddings = [item.embedding for item in response.data]
+        
+        collection.add(
+            documents=batch_texts,
+            metadatas=batch_meta,
+            ids=batch_ids,
+            embeddings=embeddings
+        )
 
-if 'HW7_VectorDB' not in st.session_state:
+if 'ELG_VectorDB' not in st.session_state:
     # Check if collection is empty and load the ELG_Database.csv file
     if collection.count() == 0:
         csv_path = 'ELG_Database.csv'

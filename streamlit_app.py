@@ -19,6 +19,7 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ChromaDB_for
 chroma_client = chromadb.PersistentClient(path=db_path)
 collection = chroma_client.get_or_create_collection('ELGCollection')
 
+# Adds API keys
 openai_api_key = st.secrets.OPENAI_API_KEY
 anthropic_api_key = st.secrets.ANTHROPIC_API_KEY
 

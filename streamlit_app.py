@@ -49,11 +49,18 @@ else:
 
 def add_to_collection(collection, text, doc_id, metadata):
     # Create embedding
-    client = st.session_state.openai_client
-    response = client.embeddings.create(
-        input=text,
-        model='text-embedding-3-small'
-    )
+    if llm_option == "ChatGPT":
+        client = st.session_state.openai_client
+        response = client.embeddings.create(
+            input=text,
+            model='text-embedding-3-small'
+        )
+    else:
+        client = st.session_state.anthropic_client
+        response = client.embeddings.create(
+            input=text,
+            model='claude-embeddings-2'
+        )
 
     # Get embedding
     embedding = response.data[0].embedding
@@ -80,7 +87,10 @@ def load_csv_to_collection(csv_path, collection):
         metadatas.append({"source": "news.csv", "row": index})
     
     # Batch embed — one API call per 2000 rows instead of one per row
-    client = st.session_state.openai_client
+    if llm_option == "ChatGPT":
+        client = st.session_state.openai_client
+    else:
+        client = st.session_state.anthropic_client
     BATCH = 2000
     for i in range(0, len(texts), BATCH):
         batch_texts = texts[i:i+BATCH]
@@ -113,13 +123,6 @@ if 'ELG_VectorDB' not in st.session_state:
     st.session_state.ELG_VectorDB = collection
 
 collection = st.session_state.ELG_VectorDB
-
-model = st.sidebar.selectbox('Which model?', ('mini', 'nano'))
-
-if model == "mini":
-    model_to_use = "gpt-5-mini"
-if model == "nano":
-    model_to_use = "gpt-5-nano"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -167,7 +170,7 @@ if prompt := st.chat_input("Ask me anything about a rate case or proceeding...")
         ]
 
         response = client.chat.completions.create(
-            model=model_to_use,
+            model=selected_model,
             messages=messages
         )
         

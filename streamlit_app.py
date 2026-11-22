@@ -22,26 +22,26 @@ collection = chroma_client.get_or_create_collection('ELGCollection')
 openai_api_key = st.secrets.OPENAI_API_KEY
 anthropic_api_key = st.secrets.ANTHROPIC_API_KEY
 
-if llm_option == "OpenAI":
+# Choose between ChatGPT and Claude
+llm_option = st.sidebar.selectbox(
+    'Choose LLM',
+    ("ChatGPT", "Claude")
+)
+
+if llm_option == "ChatGPT":
     client = OpenAI(api_key=openai_api_key)
 else:
     client = anthropic.Anthropic(api_key=anthropic_api_key)
 
-# Choose between ChatGPT and Claude
-llm_option = st.sidebar.selectbox(
-    'Choose LLM',
-    ("OpenAI", "Claude")
-)
-
 # You can use an advanced model too if you want more professional, detailed answers
 if st.sidebar.checkbox("Use advanced model"):
-    if llm_option == "OpenAI":
+    if llm_option == "ChatGPT":
         selected_model = "gpt-5.4-mini"
     else:
         selected_model = "claude-sonnet-5"
 
 else:
-    if llm_option == "OpenAI":
+    if llm_option == "ChatGPT":
         selected_model = "gpt-5.4-nano"
     else:
         selected_model = "claude-haiku-4-5-20251001"

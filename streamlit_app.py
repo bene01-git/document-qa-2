@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import json
 from openai import OpenAI
+import anthropic
 import chromadb
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -18,9 +19,32 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ChromaDB_for
 chroma_client = chromadb.PersistentClient(path=db_path)
 collection = chroma_client.get_or_create_collection('ELGCollection')
 
-# Create OpenAI client
-if 'open_ai_client' not in st.session_state:
-    st.session_state.openai_client = OpenAI(api_key=st.secrets.OPENAI_API_KEY)
+openai_api_key = st.secrets.OPENAI_API_KEY
+anthropic_api_key = st.secrets.ANTHROPIC_API_KEY
+
+if llm_option == "OpenAI":
+    client = OpenAI(api_key=openai_api_key)
+else:
+    client = anthropic.Anthropic(api_key=anthropic_api_key)
+
+# Choose between ChatGPT and Claude
+llm_option = st.sidebar.selectbox(
+    'Choose LLM',
+    ("OpenAI", "Claude")
+)
+
+# You can use an advanced model too if you want more professional, detailed answers
+if st.sidebar.checkbox("Use advanced model"):
+    if llm_option == "OpenAI":
+        selected_model = "gpt-5.4-mini"
+    else:
+        selected_model = "claude-sonnet-5"
+
+else:
+    if llm_option == "OpenAI":
+        selected_model = "gpt-5.4-nano"
+    else:
+        selected_model = "claude-haiku-4-5-20251001"
 
 def add_to_collection(collection, text, doc_id, metadata):
     # Create embedding
